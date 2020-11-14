@@ -1,27 +1,25 @@
+import Flying from "components/Flying";
 import { dbService } from "fbase";
 import React, { useEffect, useState } from "react";
 
-const Home = () => {
+const Home = ({ userObj }) => {
   const [flying, setFlying] = useState("");
   const [flyings, setFlyings] = useState([]);
-  const getFlyings = async () => {
-    const dbFlyings = await dbService.collection("flyings").get();
-    dbFlyings.forEach((document) => {
-      const flyingObject = {
-        ...document.data(),
-        id: document.id,
-      };
-      setFlyings((prev) => [flyingObject, ...prev]);
-    });
-  };
   useEffect(() => {
-    getFlyings();
+    dbService.collection("flyings").onSnapshot((snapshot) => {
+      const flyingArray = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFlyings(flyingArray);
+    });
   }, []);
   const onSubmit = async (event) => {
     event.preventDefault();
     await dbService.collection("flyings").add({
-      flying,
+      text: flying,
       createdAt: Date.now(),
+      creatorId: userObj.uid,
     });
     setFlying("");
   };
@@ -45,9 +43,11 @@ const Home = () => {
       </form>
       <div>
         {flyings.map((flying) => (
-          <div key={flying.id}>
-            <h4>{flying.flying}</h4>
-          </div>
+          <Flying
+            key={flying.id}
+            flyingObj={flying}
+            isOwner={flying.creatorId === userObj.uid}
+          />
         ))}
       </div>
     </div>
