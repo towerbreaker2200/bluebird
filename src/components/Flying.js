@@ -1,13 +1,14 @@
-import { dbService } from "fbase";
+import { dbService, storageSurvice } from "fbase";
 import React, { useState } from "react";
 
 const Flying = ({ flyingObj, isOwner }) => {
   const [editing, setEditing] = useState(false);
   const [newFlying, setNewFlying] = useState(flyingObj.text);
-  const onDeleteClick = () => {
+  const onDeleteClick = async () => {
     const ok = window.confirm("Are you sure you want to delete this flying?");
     if (ok) {
-      dbService.doc(`flyings/${flyingObj.id}`).delete();
+      await dbService.doc(`flyings/${flyingObj.id}`).delete();
+      await storageSurvice.refFromURL(flyingObj.attachmentURL).delete();
     }
   };
   const toggleEditing = () => setEditing((prev) => !prev);
@@ -43,6 +44,9 @@ const Flying = ({ flyingObj, isOwner }) => {
       ) : (
         <>
           <h4>{flyingObj.text}</h4>
+          {flyingObj.attachmentURL && (
+            <img src={flyingObj.attachmentURL} width="50px" height="50px" />
+          )}
           {isOwner && (
             <>
               <button onClick={onDeleteClick}>Delete Flying</button>
