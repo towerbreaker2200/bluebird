@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 const Home = ({ userObj }) => {
   const [flying, setFlying] = useState("");
   const [flyings, setFlyings] = useState([]);
-  const [attachment, setAttachment] = useState();
+  const [attachment, setAttachment] = useState("");
   useEffect(() => {
     dbService.collection("flyings").onSnapshot((snapshot) => {
       const flyingArray = snapshot.docs.map((doc) => ({
